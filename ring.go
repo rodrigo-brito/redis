@@ -381,7 +381,7 @@ func (c *Ring) Close() error {
 	return firstErr
 }
 
-func (c *Ring) Pipeline() *Pipeline {
+func (c *Ring) Pipeline() RedisPipilineInterface {
 	pipe := Pipeline{
 		exec: c.pipelineExec,
 	}
@@ -390,8 +390,8 @@ func (c *Ring) Pipeline() *Pipeline {
 	return &pipe
 }
 
-func (c *Ring) Pipelined(fn func(*Pipeline) error) ([]Cmder, error) {
-	return c.Pipeline().pipelined(fn)
+func (c *Ring) Pipelined(fn func(RedisPipilineInterface) error) ([]Cmder, error) {
+	return c.Pipeline().(*Pipeline).pipelined(fn)
 }
 
 func (c *Ring) pipelineExec(cmds []Cmder) (firstErr error) {

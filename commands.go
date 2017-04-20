@@ -39,8 +39,8 @@ func formatSec(dur time.Duration) int64 {
 }
 
 type Cmdable interface {
-	Pipeline() *Pipeline
-	Pipelined(fn func(*Pipeline) error) ([]Cmder, error)
+	Pipeline() RedisPipilineInterface
+	Pipelined(fn func(RedisPipilineInterface) error) ([]Cmder, error)
 
 	Echo(message interface{}) *StringCmd
 	Ping() *StatusCmd

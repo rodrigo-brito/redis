@@ -61,7 +61,7 @@ func (c *baseClient) initConn(cn *pool.Conn) error {
 
 	// Temp client for Auth and Select.
 	client := newClient(c.opt, pool.NewSingleConnPool(cn))
-	_, err := client.Pipelined(func(pipe *Pipeline) error {
+	_, err := client.Pipelined(func(pipe RedisPipilineInterface) error {
 		if c.opt.Password != "" {
 			pipe.Auth(c.opt.Password)
 		}
@@ -324,11 +324,11 @@ func (c *Client) PoolStats() *PoolStats {
 	}
 }
 
-func (c *Client) Pipelined(fn func(*Pipeline) error) ([]Cmder, error) {
-	return c.Pipeline().pipelined(fn)
+func (c *Client) Pipelined(fn func(RedisPipilineInterface) error) ([]Cmder, error) {
+	return c.Pipeline().(*Pipeline).pipelined(fn)
 }
 
-func (c *Client) Pipeline() *Pipeline {
+func (c *Client) Pipeline() RedisPipilineInterface {
 	pipe := Pipeline{
 		exec: c.pipelineExecer(c.pipelineProcessCmds),
 	}
@@ -337,12 +337,12 @@ func (c *Client) Pipeline() *Pipeline {
 	return &pipe
 }
 
-func (c *Client) TxPipelined(fn func(*Pipeline) error) ([]Cmder, error) {
-	return c.TxPipeline().pipelined(fn)
+func (c *Client) TxPipelined(fn func(RedisPipilineInterface) error) ([]Cmder, error) {
+	return c.TxPipeline().(*Pipeline).pipelined(fn)
 }
 
 // TxPipeline acts like Pipeline, but wraps queued commands with MULTI/EXEC.
-func (c *Client) TxPipeline() *Pipeline {
+func (c *Client) TxPipeline() RedisPipilineInterface {
 	pipe := Pipeline{
 		exec: c.pipelineExecer(c.txPipelineProcessCmds),
 	}
